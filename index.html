@@ -656,12 +656,12 @@
 
                         <div class="ls-note">
                             <i class="ri-shopping-cart-2-fill"></i>
-                            <span>Mau screenshot <b>isi keranjang / data lokal</b>? Keranjang disimpan di <b>localStorage</b>, bukan cookie. Buka <b>F12 → Application → Local Storage</b>, lihat nama <b>Key</b>-nya (mis. <code>cart</code>), lalu tulis: <code>{"cart": [...value...]}</code></span>
+                            <span>Mau screenshot <b>isi keranjang / data lokal</b>? Buka <b>F12 → Application → Local Storage</b>, klik domain situsnya. Lihat nama <b>Key</b> persis di kolom kiri (mis. <code>desamind_cart</code>, bukan asal <code>cart</code>), salin <b>Value</b>-nya, lalu tulis: <code>{"NAMA_KEY": value}</code></span>
                         </div>
 
                         <div class="form-group">
                             <label>LOCAL STORAGE (JSON, OPSIONAL)</label>
-                            <textarea id="localstorage" class="cookie-textarea" placeholder='{"cart": [{"product":{"name":"Beras Organik 5kg","price":65000},"quantity":2}]}'></textarea>
+                            <textarea id="localstorage" class="cookie-textarea" placeholder='{"desamind_cart": [{"product":{"name":"Beras Organik 5kg","price":65000},"quantity":2}]}'></textarea>
                         </div>
                     </div>
                 </div>
