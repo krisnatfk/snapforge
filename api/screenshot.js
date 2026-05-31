@@ -1,5 +1,10 @@
-const chromium = require('@sparticuz/chromium');
+const chromium = require('@sparticuz/chromium-min');
 const puppeteer = require('puppeteer-core');
+
+// URL remote binary Chromium (brotli pack) — versi HARUS cocok dengan chromium-min.
+// chromium-min 131.0.1 → pakai release @sparticuz/chromium v131.0.1
+const CHROMIUM_PACK_URL =
+  'https://github.com/Sparticuz/chromium/releases/download/v131.0.1/chromium-v131.0.1-pack.tar';
 
 // ─── Helper: auto-scroll untuk memicu lazy-load & scroll-animation ─────────────
 async function autoScroll(page) {
@@ -61,10 +66,13 @@ module.exports = async (req, res) => {
   let browser = null;
 
   try {
+    // Hemat memory di serverless
+    chromium.setGraphicsMode = false;
+
     browser = await puppeteer.launch({
       args: chromium.args,
       defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath(),
+      executablePath: await chromium.executablePath(CHROMIUM_PACK_URL),
       headless: chromium.headless,
     });
 
@@ -116,6 +124,7 @@ module.exports = async (req, res) => {
     return res.status(200).json({ success: true, image_url: imageUrl });
 
   } catch (err) {
+    console.error('Screenshot error:', err);
     let userMessage = 'Gagal mengambil screenshot.';
     if (err.message.includes('net::ERR_NAME_NOT_RESOLVED')) {
       userMessage = 'Domain tidak ditemukan. Cek URL-nya lagi bro.';
@@ -126,7 +135,8 @@ module.exports = async (req, res) => {
     } else if (err.message.includes('net::ERR_CERT')) {
       userMessage = 'SSL certificate bermasalah pada website target.';
     }
-    return res.status(500).json({ success: false, message: userMessage });
+    // debug: sertakan pesan asli (bisa dihapus nanti kalau sudah stabil)
+    return res.status(500).json({ success: false, message: userMessage, debug: err.message });
 
   } finally {
     if (browser) await browser.close();
