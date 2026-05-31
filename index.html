@@ -154,6 +154,60 @@
             box-shadow: 2px 2px 0px var(--black);
         }
 
+        /* ===== TAB NAVIGATION ===== */
+        .tab-nav {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            margin-bottom: 25px;
+            border: var(--border);
+            box-shadow: 4px 4px 0px var(--black);
+        }
+        .tab-btn {
+            background: var(--white);
+            border: none;
+            border-right: var(--border);
+            padding: 14px 10px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 13px;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+            color: var(--black);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: 0.15s;
+        }
+        .tab-btn:last-child { border-right: none; }
+        .tab-btn i { font-size: 16px; }
+        .tab-btn:hover { background: var(--bg-main); }
+        .tab-btn.active { background: var(--vibrant-violet); color: var(--white); }
+        .tab-btn.active i { color: var(--vibrant-yellow); }
+        .tab-btn .tab-dot {
+            width: 9px; height: 9px; border-radius: 50%;
+            background: var(--vibrant-green); border: 1.5px solid var(--black);
+            display: none;
+        }
+        .tab-btn.has-data .tab-dot { display: inline-block; }
+
+        /* Tab Panel */
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; animation: fadeIn 0.2s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .panel-hint {
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            color: #555;
+            background: var(--bg-main);
+            border-left: 4px solid var(--vibrant-orange);
+            padding: 8px 12px;
+            margin-bottom: 20px;
+        }
+
         /* Form Elements */
         .form-group { margin-bottom: 20px; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;}
@@ -185,7 +239,7 @@
         }
         .input-box i { padding: 0 15px; font-size: 18px; border-right: var(--border); background: var(--white); }
         
-        input[type="url"], input[type="number"], select {
+        input[type="url"], input[type="number"], input[type="text"], select {
             width: 100%;
             height: 100%;
             border: none;
@@ -508,6 +562,8 @@
         @media (max-width: 600px) {
             .grid-2 { grid-template-columns: 1fr; }
             .container { padding: 0 15px; }
+            .tab-btn { font-size: 11px; padding: 12px 6px; }
+            .tab-btn span.tab-label { display: inline; }
         }
     </style>
 </head>
@@ -540,136 +596,146 @@
                 <span class="badge">REC</span>
                 <span style="font-weight: 800; font-size: 14px;">LIVE CAPTURE SYSTEM</span>
             </div>
-            
+
+            <!-- ===== TAB NAVIGATION ===== -->
+            <div class="tab-nav">
+                <button type="button" class="tab-btn active" data-tab="capture">
+                    <i class="ri-camera-lens-fill"></i> <span class="tab-label">CAPTURE</span>
+                </button>
+                <button type="button" class="tab-btn" data-tab="login">
+                    <i class="ri-lock-2-fill"></i> <span class="tab-label">MODE LOGIN</span>
+                    <span class="tab-dot" id="login-dot"></span>
+                </button>
+            </div>
+
             <form id="ss-form">
-                <div class="form-group">
-                    <label>TARGET URL</label>
-                    <div class="input-box">
-                        <i class="ri-links-line"></i>
-                        <input type="url" id="url" placeholder="https://domain-target.com" required>
-                    </div>
-                </div>
+                <!-- ===== TAB 1: CAPTURE ===== -->
+                <div class="tab-panel active" id="panel-capture">
+                    <div class="panel-hint">Setelan dasar screenshot — masukkan URL & pilih resolusi.</div>
 
-                <div class="form-group">
-                    <label>PILIH RESOLUSI</label>
-                    <div class="select-box">
-                        <select id="device-preset" style="padding-left: 15px;">
-                            <option value="phone">Mobile (375 x 812)</option>
-                            <option value="tablet">Tablet (768 x 1024)</option>
-                            <option value="laptop">Laptop (1366 x 768)</option>
-                            <option value="pcfhd" selected>PC FHD (1920 x 1080)</option>
-                            <option value="pc4k">PC 4K (3840 x 2160)</option>
-                            <option value="custom">Custom (Atur Manual)</option>
-                        </select>
-                        <i class="ri-arrow-down-s-fill"></i>
-                    </div>
-                </div>
-
-                <div class="grid-2">
                     <div class="form-group">
-                        <label>VIEWPORT WIDTH</label>
+                        <label>TARGET URL</label>
                         <div class="input-box">
-                            <input type="number" id="width" value="1920">
-                            <span class="unit">PX</span>
+                            <i class="ri-links-line"></i>
+                            <input type="url" id="url" placeholder="https://domain-target.com" required>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label>VIEWPORT HEIGHT</label>
-                        <div class="input-box">
-                            <input type="number" id="height" value="1080">
-                            <span class="unit">PX</span>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Grid Rapi: Render Scale disebelah Full Page Mode -->
-                <div class="grid-2">
                     <div class="form-group">
-                        <label>RENDER SCALE</label>
+                        <label>PILIH RESOLUSI</label>
                         <div class="select-box">
-                            <select id="scale" style="padding-left: 15px;">
-                                <option value="1">1x (Standard)</option>
-                                <option value="2">2x (Retina HD)</option>
-                                <option value="3">3x (Ultra 4K)</option>
+                            <select id="device-preset" style="padding-left: 15px;">
+                                <option value="phone">Mobile (375 x 812)</option>
+                                <option value="tablet">Tablet (768 x 1024)</option>
+                                <option value="laptop">Laptop (1366 x 768)</option>
+                                <option value="pcfhd" selected>PC FHD (1920 x 1080)</option>
+                                <option value="pc4k">PC 4K (3840 x 2160)</option>
+                                <option value="custom">Custom (Atur Manual)</option>
                             </select>
                             <i class="ri-arrow-down-s-fill"></i>
                         </div>
                     </div>
-                    
-                    <div class="form-group">
-                        <label>FULL PAGE MODE</label>
-                        <div class="fullpage-box">
-                            <span style="font-size: 13px; font-weight: 800; color: var(--black);">AKTIFKAN</span>
-                            <label class="neo-switch">
-                                <input type="checkbox" id="fullpage">
-                                <span class="slider"></span>
-                            </label>
+
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>VIEWPORT WIDTH</label>
+                            <div class="input-box">
+                                <input type="number" id="width" value="1920">
+                                <span class="unit">PX</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>VIEWPORT HEIGHT</label>
+                            <div class="input-box">
+                                <input type="number" id="height" value="1080">
+                                <span class="unit">PX</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>RENDER SCALE</label>
+                            <div class="select-box">
+                                <select id="scale" style="padding-left: 15px;">
+                                    <option value="1">1x (Standard)</option>
+                                    <option value="2">2x (Retina HD)</option>
+                                    <option value="3">3x (Ultra 4K)</option>
+                                </select>
+                                <i class="ri-arrow-down-s-fill"></i>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>FULL PAGE MODE</label>
+                            <div class="fullpage-box">
+                                <span style="font-size: 13px; font-weight: 800; color: var(--black);">AKTIFKAN</span>
+                                <label class="neo-switch">
+                                    <input type="checkbox" id="fullpage">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- ADVANCED: Screenshot halaman setelah login (cookie injection) -->
-                <div class="advanced-section">
-                    <button type="button" id="advanced-toggle" class="advanced-toggle">
-                        <span><i class="ri-lock-2-fill"></i> MODE LOGIN (ADVANCED)</span>
-                        <i class="ri-arrow-down-s-fill" id="advanced-chevron"></i>
-                    </button>
+                <!-- ===== TAB 2: MODE LOGIN ===== -->
+                <div class="tab-panel" id="panel-login">
+                    <div class="panel-hint">Opsional — untuk screenshot halaman setelah login (dashboard, keranjang, dll).</div>
 
-                    <div class="advanced-body" id="advanced-body">
-                        <div class="tutorial-box">
-                            <div class="tutorial-title"><i class="ri-guide-fill"></i> CARA PAKAI (IKUTI URUTAN)</div>
+                    <div class="tutorial-box">
+                        <div class="tutorial-title"><i class="ri-guide-fill"></i> CARA PAKAI (IKUTI URUTAN)</div>
 
-                            <div class="tutorial-step">
-                                <span class="step-num">1</span>
-                                <div class="step-text">
-                                    Install ekstensi <b>Cookie-Editor</b> di browsermu.
-                                    <a href="https://chromewebstore.google.com/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm" target="_blank" class="step-link">Chrome / Edge <i class="ri-external-link-line"></i></a>
-                                    <a href="https://addons.mozilla.org/firefox/addon/cookie-editor/" target="_blank" class="step-link">Firefox <i class="ri-external-link-line"></i></a>
-                                </div>
-                            </div>
-
-                            <div class="tutorial-step">
-                                <span class="step-num">2</span>
-                                <div class="step-text">Buka website target di tab baru, lalu <b>login</b> sampai masuk ke halaman yang mau di-screenshot.</div>
-                            </div>
-
-                            <div class="tutorial-step">
-                                <span class="step-num">3</span>
-                                <div class="step-text">Klik ikon <b>Cookie-Editor</b> di toolbar → klik tombol <b>Export</b> (ikon panah) → pilih <b>JSON</b>. Cookie otomatis ter-copy.</div>
-                            </div>
-
-                            <div class="tutorial-step">
-                                <span class="step-num">4</span>
-                                <div class="step-text">Balik ke sini, <b>paste</b> (Ctrl+V) di kotak bawah. Isi URL halaman target di atas, lalu klik <b>AMBIL SCREENSHOT</b>.</div>
-                            </div>
-
-                            <div class="tutorial-warn">
-                                <i class="ri-shield-keyhole-fill"></i>
-                                <span>Cookie = kunci akunmu. Cuma pakai <b>akun sendiri</b>, jangan akun orang lain. Cookie tidak disimpan server, dipakai sekali lalu hilang.</span>
+                        <div class="tutorial-step">
+                            <span class="step-num">1</span>
+                            <div class="step-text">
+                                Install ekstensi <b>Cookie-Editor</b> di browsermu.
+                                <a href="https://chromewebstore.google.com/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm" target="_blank" class="step-link">Chrome / Edge <i class="ri-external-link-line"></i></a>
+                                <a href="https://addons.mozilla.org/firefox/addon/cookie-editor/" target="_blank" class="step-link">Firefox <i class="ri-external-link-line"></i></a>
                             </div>
                         </div>
 
-                        <div class="form-group">
-                            <label>SESSION COOKIES (JSON)</label>
-                            <textarea id="cookies" class="cookie-textarea" placeholder='Tempel hasil Export JSON dari Cookie-Editor di sini...'></textarea>
+                        <div class="tutorial-step">
+                            <span class="step-num">2</span>
+                            <div class="step-text">Buka website target di tab baru, lalu <b>login</b> sampai masuk ke halaman yang mau di-screenshot.</div>
                         </div>
 
-                        <div class="ls-note">
-                            <i class="ri-shopping-cart-2-fill"></i>
-                            <span>Mau screenshot <b>isi keranjang / data lokal</b>? Buka <b>F12 → Application → Local Storage</b>, klik domain situsnya. Isi <b>Key</b> dan <b>Value</b> persis seperti di sana (paste value apa adanya, tanpa diubah).</span>
+                        <div class="tutorial-step">
+                            <span class="step-num">3</span>
+                            <div class="step-text">Klik ikon <b>Cookie-Editor</b> di toolbar → klik tombol <b>Export</b> (ikon panah) → pilih <b>JSON</b>. Cookie otomatis ter-copy.</div>
                         </div>
 
-                        <div class="form-group">
-                            <label>LOCAL STORAGE KEY (OPSIONAL)</label>
-                            <div class="input-box">
-                                <input type="text" id="ls-key" placeholder="contoh: desamind_cart">
-                            </div>
+                        <div class="tutorial-step">
+                            <span class="step-num">4</span>
+                            <div class="step-text">Balik ke sini, <b>paste</b> (Ctrl+V) di kotak bawah. Isi URL di tab CAPTURE, lalu klik <b>AMBIL SCREENSHOT</b>.</div>
                         </div>
 
-                        <div class="form-group">
-                            <label>LOCAL STORAGE VALUE</label>
-                            <textarea id="ls-value" class="cookie-textarea" placeholder='Paste Value mentah dari DevTools, contoh:&#10;[{"product":{"name":"Beras Organik 5kg","price":65000},"quantity":2}]'></textarea>
+                        <div class="tutorial-warn">
+                            <i class="ri-shield-keyhole-fill"></i>
+                            <span>Cookie = kunci akunmu. Cuma pakai <b>akun sendiri</b>, jangan akun orang lain. Cookie tidak disimpan server, dipakai sekali lalu hilang.</span>
                         </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>SESSION COOKIES (JSON)</label>
+                        <textarea id="cookies" class="cookie-textarea" placeholder='Tempel hasil Export JSON dari Cookie-Editor di sini...'></textarea>
+                    </div>
+
+                    <div class="ls-note">
+                        <i class="ri-shopping-cart-2-fill"></i>
+                        <span>Mau screenshot <b>isi keranjang / data lokal</b>? Buka <b>F12 → Application → Local Storage</b>, klik domain situsnya. Isi <b>Key</b> dan <b>Value</b> persis seperti di sana (paste value apa adanya, tanpa diubah).</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>LOCAL STORAGE KEY (OPSIONAL)</label>
+                        <div class="input-box">
+                            <input type="text" id="ls-key" placeholder="contoh: desamind_cart">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>LOCAL STORAGE VALUE</label>
+                        <textarea id="ls-value" class="cookie-textarea" placeholder='Paste Value mentah dari DevTools, contoh:&#10;[{"product":{"name":"Beras Organik 5kg","price":65000},"quantity":2}]'></textarea>
                     </div>
                 </div>
 
@@ -776,10 +842,29 @@
         wInput.addEventListener('input', setCustom);
         hInput.addEventListener('input', setCustom);
 
-        // --- Toggle Advanced (Login/Cookie) ---
-        const advSection = document.querySelector('.advanced-section');
-        document.getElementById('advanced-toggle').addEventListener('click', () => {
-            advSection.classList.toggle('open');
+        // --- Tab Switching (Capture / Mode Login) ---
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabPanels = document.querySelectorAll('.tab-panel');
+        tabBtns.forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const target = btn.dataset.tab;
+                tabBtns.forEach((b) => b.classList.remove('active'));
+                tabPanels.forEach((p) => p.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById('panel-' + target).classList.add('active');
+            });
+        });
+
+        // Tampilkan indikator (titik hijau) di tab Mode Login kalau ada data terisi
+        const loginTabBtn = document.querySelector('.tab-btn[data-tab="login"]');
+        function updateLoginIndicator() {
+            const hasData = document.getElementById('cookies').value.trim()
+                || document.getElementById('ls-key').value.trim()
+                || document.getElementById('ls-value').value.trim();
+            loginTabBtn.classList.toggle('has-data', !!hasData);
+        }
+        ['cookies', 'ls-key', 'ls-value'].forEach((id) => {
+            document.getElementById(id).addEventListener('input', updateLoginIndicator);
         });
 
         // --- Logika Core Capture ---
