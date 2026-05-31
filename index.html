@@ -400,6 +400,24 @@
         }
         .download-btn:hover { background: #00c263; }
 
+        /* Tombol Salin/Copy + layout dua tombol */
+        .result-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .result-actions .btn-neo { margin-top: 0; }
+        .copy-btn {
+            background: var(--vibrant-cyan); /* Tombol Salin Biru */
+            color: var(--black);
+        }
+        .copy-btn:hover { background: #00c4dd; }
+        .copy-btn.copied { background: var(--vibrant-green); }
+        @media (max-width: 600px) {
+            .result-actions { grid-template-columns: 1fr; }
+        }
+
         .loader {
             width: 20px; height: 20px;
             border: 4px solid var(--white); border-top-color: transparent;
@@ -641,9 +659,14 @@
                     </div>
                 </div>
 
-                <button id="download-btn" class="btn-neo download-btn">
-                    <i class="ri-download-cloud-2-fill"></i> SIMPAN GAMBAR
-                </button>
+                <div class="result-actions">
+                    <button id="copy-btn" class="btn-neo copy-btn">
+                        <i class="ri-file-copy-2-fill" id="copy-icon"></i> <span id="copy-text">SALIN GAMBAR</span>
+                    </button>
+                    <button id="download-btn" class="btn-neo download-btn">
+                        <i class="ri-download-cloud-2-fill"></i> SIMPAN GAMBAR
+                    </button>
+                </div>
             </div>
         </section>
 
@@ -730,6 +753,9 @@
         const resultArea = document.getElementById('result-area');
         const resultImg = document.getElementById('result-img');
         const downloadBtn = document.getElementById('download-btn');
+        const copyBtn = document.getElementById('copy-btn');
+        const copyText = document.getElementById('copy-text');
+        const copyIcon = document.getElementById('copy-icon');
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -835,6 +861,72 @@
                 window.open(`/api/download?url=${encodeURIComponent(imageUrl)}`, '_blank');
             }
         });
+
+        // --- LOGIKA SALIN/COPY GAMBAR KE CLIPBOARD ---
+        copyBtn.addEventListener('click', async () => {
+            const imageUrl = resultImg.src;
+            if (!imageUrl) return;
+
+            // Clipboard image butuh konteks aman (HTTPS atau localhost)
+            if (!navigator.clipboard || !window.ClipboardItem) {
+                alert('Browser tidak mendukung salin gambar. Pakai tombol SIMPAN GAMBAR saja.');
+                return;
+            }
+
+            const originalText = copyText.textContent;
+            copyText.textContent = 'MENYALIN...';
+            copyBtn.disabled = true;
+
+            try {
+                // Ambil gambar sebagai blob (data URL maupun http URL sama-sama bisa)
+                const resp = await fetch(imageUrl);
+                let blob = await resp.blob();
+
+                // Clipboard API paling andal dengan PNG
+                if (blob.type !== 'image/png') {
+                    blob = await convertToPng(blob);
+                }
+
+                await navigator.clipboard.write([
+                    new ClipboardItem({ 'image/png': blob })
+                ]);
+
+                // Feedback sukses
+                copyBtn.classList.add('copied');
+                copyIcon.className = 'ri-check-line';
+                copyText.textContent = 'TERSALIN!';
+                setTimeout(() => {
+                    copyBtn.classList.remove('copied');
+                    copyIcon.className = 'ri-file-copy-2-fill';
+                    copyText.textContent = originalText;
+                    copyBtn.disabled = false;
+                }, 2000);
+
+            } catch (err) {
+                console.error('Copy gagal:', err);
+                copyText.textContent = originalText;
+                copyBtn.disabled = false;
+                alert('Gagal menyalin gambar. Coba pakai tombol SIMPAN GAMBAR.');
+            }
+        });
+
+        // Helper: konversi blob gambar apa pun ke PNG via canvas
+        function convertToPng(blob) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                const url = URL.createObjectURL(blob);
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.naturalWidth;
+                    canvas.height = img.naturalHeight;
+                    canvas.getContext('2d').drawImage(img, 0, 0);
+                    URL.revokeObjectURL(url);
+                    canvas.toBlob((b) => b ? resolve(b) : reject(new Error('toBlob null')), 'image/png');
+                };
+                img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('img load error')); };
+                img.src = url;
+            });
+        }
     </script>
 </body>
 </html> 
