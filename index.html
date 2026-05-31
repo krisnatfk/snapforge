@@ -656,12 +656,19 @@
 
                         <div class="ls-note">
                             <i class="ri-shopping-cart-2-fill"></i>
-                            <span>Mau screenshot <b>isi keranjang / data lokal</b>? Buka <b>F12 → Application → Local Storage</b>, klik domain situsnya. Lihat nama <b>Key</b> persis di kolom kiri (mis. <code>desamind_cart</code>, bukan asal <code>cart</code>), salin <b>Value</b>-nya, lalu tulis: <code>{"NAMA_KEY": value}</code></span>
+                            <span>Mau screenshot <b>isi keranjang / data lokal</b>? Buka <b>F12 → Application → Local Storage</b>, klik domain situsnya. Isi <b>Key</b> dan <b>Value</b> persis seperti di sana (paste value apa adanya, tanpa diubah).</span>
                         </div>
 
                         <div class="form-group">
-                            <label>LOCAL STORAGE (JSON, OPSIONAL)</label>
-                            <textarea id="localstorage" class="cookie-textarea" placeholder='{"desamind_cart": [{"product":{"name":"Beras Organik 5kg","price":65000},"quantity":2}]}'></textarea>
+                            <label>LOCAL STORAGE KEY (OPSIONAL)</label>
+                            <div class="input-box">
+                                <input type="text" id="ls-key" placeholder="contoh: desamind_cart">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>LOCAL STORAGE VALUE</label>
+                            <textarea id="ls-value" class="cookie-textarea" placeholder='Paste Value mentah dari DevTools, contoh:&#10;[{"product":{"name":"Beras Organik 5kg","price":65000},"quantity":2}]'></textarea>
                         </div>
                     </div>
                 </div>
@@ -815,22 +822,20 @@
             }
 
             // Parse localStorage (opsional, untuk keranjang/data lokal)
+            // Pakai 2 kolom: Key + Value mentah. Value tidak perlu di-format/escape.
             let localStorageData = null;
-            const lsRaw = document.getElementById('localstorage').value.trim();
-            if (lsRaw) {
-                try {
-                    localStorageData = JSON.parse(lsRaw);
-                    if (typeof localStorageData !== 'object' || Array.isArray(localStorageData)) {
-                        throw new Error('harus object');
-                    }
-                } catch {
-                    alert('Format Local Storage tidak valid. Harus berupa JSON object {"key":"value"}.');
-                    submitBtn.disabled = false;
-                    btnText.textContent = 'AMBIL SCREENSHOT';
-                    btnIcon.style.display = 'block';
-                    loader.style.display = 'none';
-                    return;
-                }
+            const lsKey = document.getElementById('ls-key').value.trim();
+            const lsValue = document.getElementById('ls-value').value.trim();
+            if (lsKey && lsValue) {
+                // Value disimpan apa adanya (string). Server akan set persis seperti ini.
+                localStorageData = { [lsKey]: lsValue };
+            } else if (lsValue && !lsKey) {
+                alert('Isi juga nama Key Local Storage (mis. desamind_cart).');
+                submitBtn.disabled = false;
+                btnText.textContent = 'AMBIL SCREENSHOT';
+                btnIcon.style.display = 'block';
+                loader.style.display = 'none';
+                return;
             }
 
             const payload = {
