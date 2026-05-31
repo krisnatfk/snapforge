@@ -41,15 +41,18 @@ async function autoScroll(page) {
   await page.evaluate(async () => {
     await new Promise((resolve) => {
       let totalHeight = 0;
-      const distance = 200;          // px per langkah
-      const delay = 100;             // ms jeda antar langkah
+      let ticks = 0;
+      const distance = 300;          // px per langkah
+      const delay = 80;              // ms jeda antar langkah
+      const maxTicks = 60;           // batas keras: maks 60 langkah (~5 detik)
       const timer = setInterval(() => {
         const scrollHeight = document.body.scrollHeight;
         window.scrollBy(0, distance);
         totalHeight += distance;
+        ticks++;
 
-        // Berhenti kalau sudah sampai bawah
-        if (totalHeight >= scrollHeight - window.innerHeight) {
+        // Berhenti kalau sampai bawah ATAU sudah mentok batas langkah
+        if (totalHeight >= scrollHeight - window.innerHeight || ticks >= maxTicks) {
           clearInterval(timer);
           resolve();
         }
@@ -147,12 +150,26 @@ app.post('/api/screenshot', async (req, res) => {
       }
     }
 
-    // Tunggu hingga halaman + resource (termasuk font) selesai dimuat.
-    // networkidle0 = tunggu sampai benar-benar tidak ada request aktif.
+    // Tunggu DOM siap dulu (cepat), JANGAN networkidle0 — untuk SPA (React/Vue)
+    // dengan koneksi realtime (Supabase/websocket), network TIDAK pernah idle,
+    // jadi networkidle0 akan menggantung sampai timeout. Pakai domcontentloaded
+    // lalu beri waktu render via settle delay di bawah.
     await page.goto(targetUrl, {
-      waitUntil: 'networkidle0',
+      waitUntil: 'domcontentloaded',
       timeout: 30000,
     });
+
+    // Tunggu network agak tenang, tapi JANGAN tunggu idle total.
+    // idleTime pendek + timeout aman supaya tidak menggantung di SPA realtime.
+    try {
+      await page.waitForNetworkIdle({ idleTime: 800, timeout: 8000 });
+    } catch {
+      // SPA realtime mungkin tidak pernah idle — abaikan dan lanjut.
+    }
+
+    // SPA (React) sering tampil "Loading..." dulu sebelum konten asli muncul.
+    // Beri waktu ekstra agar data (mis. Supabase fetch) selesai & UI ter-render.
+    await new Promise((r) => setTimeout(r, 3000));
 
     // Tunggu sebentar agar render awal selesai
     await new Promise((r) => setTimeout(r, 1000));
@@ -175,43 +192,11 @@ app.post('/api/screenshot', async (req, res) => {
     // Wajib untuk full_page; juga membantu viewport-mode kalau ada lazy image.
     await autoScroll(page);
 
-    // Tunggu semua web-font selesai di-load & ter-render.
-    // Tanpa ini, teks bisa ke-capture dengan font fallback (terlihat beda dari asli).
-    try {
-      await page.evaluateHandle('document.fonts.ready');
-      await new Promise((r) => setTimeout(r, 500));
-    } catch {
-      // abaikan kalau gagal
-    }
-
-    // Tunggu network idle lagi setelah scroll (gambar lazy mungkin baru ke-fetch)
-    try {
-      await page.waitForNetworkIdle({ idleTime: 500, timeout: 8000 });
-    } catch {
-      // abaikan kalau timeout — lanjut screenshot saja
-    }
-
-    // Jeda "settle" final: beri waktu animasi chart (Chart.js / ApexCharts /
-    // canvas) selesai menggambar. Chart digambar via requestAnimationFrame yang
-    // tidak terpengaruh CSS-kill di atas, jadi butuh waktu render tersendiri.
-    await new Promise((r) => setTimeout(r, 1500));
-
-    // Pastikan semua <canvas> & <img> sudah benar-benar ter-render.
-    try {
-      await page.evaluate(async () => {
-        // Tunggu 2x animation frame agar frame chart terakhir ter-paint
-        await new Promise((res) => requestAnimationFrame(() => requestAnimationFrame(res)));
-        // Tunggu semua gambar selesai (decode) kalau ada yang belum
-        const imgs = Array.from(document.images || []);
-        await Promise.all(
-          imgs
-            .filter((img) => !img.complete)
-            .map((img) => new Promise((res) => { img.onload = img.onerror = res; }))
-        );
-      });
-    } catch {
-      // abaikan
-    }
+    // Beri waktu render final: font, animasi chart (canvas/requestAnimationFrame),
+    // dan elemen lain selesai. Pakai delay sederhana — andal & tidak menggantung.
+    // (page.evaluate untuk fonts.ready / rAF terbukti bisa hang di SPA berat,
+    //  jadi sengaja dihindari.)
+    await new Promise((r) => setTimeout(r, 2500));
 
     // Ambil screenshot
     const screenshotBuffer = await page.screenshot({
