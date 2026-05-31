@@ -2,7 +2,7 @@
   "version": 2,
   "functions": {
     "api/screenshot.js": {
-      "memory": 1024,
+      "memory": 512,
       "maxDuration": 60
     },
     "api/download.js": {
