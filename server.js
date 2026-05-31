@@ -191,6 +191,28 @@ app.post('/api/screenshot', async (req, res) => {
       // abaikan kalau timeout — lanjut screenshot saja
     }
 
+    // Jeda "settle" final: beri waktu animasi chart (Chart.js / ApexCharts /
+    // canvas) selesai menggambar. Chart digambar via requestAnimationFrame yang
+    // tidak terpengaruh CSS-kill di atas, jadi butuh waktu render tersendiri.
+    await new Promise((r) => setTimeout(r, 1500));
+
+    // Pastikan semua <canvas> & <img> sudah benar-benar ter-render.
+    try {
+      await page.evaluate(async () => {
+        // Tunggu 2x animation frame agar frame chart terakhir ter-paint
+        await new Promise((res) => requestAnimationFrame(() => requestAnimationFrame(res)));
+        // Tunggu semua gambar selesai (decode) kalau ada yang belum
+        const imgs = Array.from(document.images || []);
+        await Promise.all(
+          imgs
+            .filter((img) => !img.complete)
+            .map((img) => new Promise((res) => { img.onload = img.onerror = res; }))
+        );
+      });
+    } catch {
+      // abaikan
+    }
+
     // Ambil screenshot
     const screenshotBuffer = await page.screenshot({
       fullPage: Boolean(full_page),
