@@ -5,7 +5,12 @@ FROM node:20-slim
 RUN apt-get update && apt-get install -y \
     chromium \
     fonts-liberation \
+    fonts-noto \
+    fonts-noto-cjk \
     fonts-noto-color-emoji \
+    fonts-dejavu-core \
+    fonts-freefont-ttf \
+    fontconfig \
     libnss3 \
     libatk1.0-0 \
     libatk-bridge2.0-0 \

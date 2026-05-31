@@ -115,9 +115,10 @@ app.post('/api/screenshot', async (req, res) => {
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
     );
 
-    // Set timeout 30 detik, tunggu hingga network idle
+    // Tunggu hingga halaman + resource (termasuk font) selesai dimuat.
+    // networkidle0 = tunggu sampai benar-benar tidak ada request aktif.
     await page.goto(targetUrl, {
-      waitUntil: 'networkidle2',
+      waitUntil: 'networkidle0',
       timeout: 30000,
     });
 
@@ -141,6 +142,15 @@ app.post('/api/screenshot', async (req, res) => {
     // Scroll seluruh halaman untuk memicu lazy-load & scroll-animation.
     // Wajib untuk full_page; juga membantu viewport-mode kalau ada lazy image.
     await autoScroll(page);
+
+    // Tunggu semua web-font selesai di-load & ter-render.
+    // Tanpa ini, teks bisa ke-capture dengan font fallback (terlihat beda dari asli).
+    try {
+      await page.evaluateHandle('document.fonts.ready');
+      await new Promise((r) => setTimeout(r, 500));
+    } catch {
+      // abaikan kalau gagal
+    }
 
     // Tunggu network idle lagi setelah scroll (gambar lazy mungkin baru ke-fetch)
     try {
