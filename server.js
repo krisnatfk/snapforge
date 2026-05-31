@@ -192,46 +192,53 @@ app.post('/api/screenshot', async (req, res) => {
     // Wajib untuk full_page; juga membantu viewport-mode kalau ada lazy image.
     await autoScroll(page);
 
-    // ── Khusus FULL PAGE: set viewport ke tinggi penuh halaman, lalu jepret
-    //    pakai screenshot VIEWPORT BIASA (bukan fullPage:true) ──
-    // Kenapa: page.screenshot({fullPage:true}) melakukan resize internal LAGI
-    // saat menjepret, yang memicu chart responsive (ResizeObserver) menggambar
-    // ulang dari nol dan langsung ketangkap setengah jadi. Dengan men-set
-    // viewport setinggi halaman lalu jepret viewport biasa, tidak ada resize
-    // kedua → chart sudah selesai menggambar saat dijepret.
+    // ── FULL PAGE: deteksi cerdas ──
+    // Sebagian halaman punya elemen 100vh (peta, hero fullscreen) yang IKUT
+    // membesar saat viewport diperbesar → halaman "tumbuh" tanpa henti & footer
+    // kepotong. Halaman lain (dashboard) stabil tapi chart-nya rusak kalau pakai
+    // fullPage:true (resize ganda).
+    //
+    // Strategi: ukur tinggi, set viewport setinggi itu, ukur lagi.
+    //  - Tinggi TUMBUH → ada elemen 100vh → pakai fullPage:true bawaan Puppeteer
+    //    (paling andal menangkap semua, termasuk footer).
+    //  - Tinggi STABIL → pakai trik viewport (aman untuk chart).
     let useFullPageFlag = Boolean(full_page);
 
     if (full_page) {
       try {
-        const fullHeight = await page.evaluate(() => {
-          return Math.max(
-            document.body.scrollHeight,
-            document.documentElement.scrollHeight,
-            document.body.offsetHeight,
-            document.documentElement.offsetHeight
-          );
-        });
+        const measure = () => page.evaluate(() =>
+          Math.max(document.body.scrollHeight, document.documentElement.scrollHeight)
+        );
 
-        // Set viewport tinggi = tinggi penuh halaman (cap 20000px biar aman)
+        const h1 = await measure();
+
         await page.setViewport({
           width: parseInt(width),
-          height: Math.min(fullHeight, 20000),
+          height: Math.min(h1, 20000),
           deviceScaleFactor: parseInt(device_scale),
         });
-
-        // Pastikan di posisi paling atas
         await page.evaluate(() => window.scrollTo(0, 0));
+        await new Promise((r) => setTimeout(r, 1500));
 
-        // Beri waktu chart & elemen responsive selesai menggambar ulang
-        // setelah perubahan ukuran viewport.
-        await new Promise((r) => setTimeout(r, 2500));
+        const h2 = await measure();
 
-        // Karena viewport sudah setinggi halaman, jepret viewport biasa.
-        // Ini menghindari resize internal kedua dari fullPage:true.
-        useFullPageFlag = false;
+        if (h2 > h1 + 50) {
+          // Halaman tumbuh (peta/hero 100vh). Balikkan viewport ke ukuran normal
+          // lalu serahkan ke fullPage:true bawaan Puppeteer.
+          await page.setViewport({
+            width: parseInt(width),
+            height: parseInt(height),
+            deviceScaleFactor: parseInt(device_scale),
+          });
+          await new Promise((r) => setTimeout(r, 1500));
+          useFullPageFlag = true;
+        } else {
+          // Halaman stabil (dashboard). Viewport sudah setinggi halaman → jepret
+          // viewport biasa supaya chart tidak rusak oleh resize ganda.
+          useFullPageFlag = false;
+        }
       } catch {
-        // kalau gagal, balik ke fullPage bawaan Puppeteer
-        useFullPageFlag = true;
+        useFullPageFlag = true; // fallback aman
       }
     }
 
