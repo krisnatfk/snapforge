@@ -5,6 +5,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SnapForge | Web Screenshot Tool</title>
+
+    <!-- ===== SEO & Deskripsi ===== -->
+    <meta name="description" content="SnapForge — tool screenshot website otomatis. Masukkan URL, pilih resolusi, langsung jadi gambar HD. Support full page & multi resolusi.">
+    <meta name="author" content="Krisna">
+    <meta name="theme-color" content="#8a2be2">
+
+    <!-- ===== Open Graph (WhatsApp, Facebook, LinkedIn) ===== -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="SnapForge">
+    <meta property="og:title" content="SnapForge — Web Screenshot Tool">
+    <meta property="og:description" content="Tool screenshot website otomatis. Masukkan URL, pilih resolusi, langsung jadi gambar HD. Support full page & multi resolusi.">
+    <meta property="og:url" content="https://snapforge-production-de53.up.railway.app">
+    <meta property="og:image" content="https://snapforge-production-de53.up.railway.app/preview.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="id_ID">
+
+    <!-- ===== Twitter / X Card ===== -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SnapForge — Web Screenshot Tool">
+    <meta name="twitter:description" content="Tool screenshot website otomatis. Masukkan URL, pilih resolusi, langsung jadi gambar HD.">
+    <meta name="twitter:image" content="https://snapforge-production-de53.up.railway.app/preview.png">
+
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;800&family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
     
@@ -578,16 +601,46 @@
             }
         });
 
-        // --- LOGIKA DOWNLOAD (SOLUSI FINAL TEMBUS CORS & AMAN) ---
-        // PASTIKAN LU UDAH BIKIN FILE api/download.js
-        downloadBtn.addEventListener('click', (e) => {
+        // --- LOGIKA DOWNLOAD ---
+        downloadBtn.addEventListener('click', async (e) => {
             e.preventDefault();
-            
-            const imageUrl = resultImg.src;
-            if(!imageUrl) return;
 
-            // Memaksa browser mengunduh melalui backend api/download.js
-            window.location.href = `/api/download?url=${encodeURIComponent(imageUrl)}`;
+            const imageUrl = resultImg.src;
+            if (!imageUrl) return;
+
+            const filename = `snapforge_${Date.now()}.png`;
+
+            try {
+                // Kalau base64 data URL → download langsung di browser.
+                // (Tidak boleh lewat query URL karena base64 terlalu panjang
+                //  dan akan diblokir browser → about:blank#blocked)
+                if (imageUrl.startsWith('data:')) {
+                    const a = document.createElement('a');
+                    a.href = imageUrl;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    return;
+                }
+
+                // Kalau URL http biasa → fetch jadi blob lalu download.
+                const resp = await fetch(imageUrl);
+                const blob = await resp.blob();
+                const blobUrl = URL.createObjectURL(blob);
+
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(blobUrl);
+
+            } catch (err) {
+                // Fallback terakhir: lewat backend proxy
+                window.open(`/api/download?url=${encodeURIComponent(imageUrl)}`, '_blank');
+            }
         });
     </script>
 </body>
