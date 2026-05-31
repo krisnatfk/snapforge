@@ -78,6 +78,7 @@ app.post('/api/screenshot', async (req, res) => {
     device_scale = 1,
     full_page = false,
     cookies = [],
+    local_storage = null,
   } = req.body;
 
   // Validasi URL
@@ -158,6 +159,28 @@ app.post('/api/screenshot', async (req, res) => {
       waitUntil: 'domcontentloaded',
       timeout: 30000,
     });
+
+    // ── Injeksi localStorage (untuk data sisi-klien: keranjang belanja, dll) ──
+    // Keranjang/cart biasanya disimpan di localStorage, BUKAN cookie. Cookie
+    // hanya bawa login. Set localStorage lalu reload agar app membacanya saat
+    // inisialisasi. localStorage terikat origin → harus di-set setelah goto.
+    if (local_storage && typeof local_storage === 'object') {
+      try {
+        await page.evaluate((data) => {
+          for (const key in data) {
+            if (Object.prototype.hasOwnProperty.call(data, key)) {
+              try { window.localStorage.setItem(key, String(data[key])); } catch {}
+            }
+          }
+        }, local_storage);
+
+        // Reload supaya app (React/Vue) membaca localStorage yang baru di-set
+        await page.reload({ waitUntil: 'domcontentloaded', timeout: 30000 });
+        console.log(`🛒 localStorage di-inject (${Object.keys(local_storage).length} item) + reload`);
+      } catch (lsErr) {
+        console.error('Gagal set localStorage:', lsErr.message);
+      }
+    }
 
     // Tunggu network agak tenang, tapi JANGAN tunggu idle total.
     // idleTime pendek + timeout aman supaya tidak menggantung di SPA realtime.

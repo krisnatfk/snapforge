@@ -352,6 +352,27 @@
         }
         .tutorial-warn i { font-size: 18px; flex-shrink: 0; }
 
+        .ls-note {
+            display: flex;
+            gap: 10px;
+            background: var(--vibrant-cyan);
+            border: 2px solid var(--black);
+            padding: 10px 12px;
+            margin-bottom: 12px;
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+        .ls-note i { font-size: 18px; flex-shrink: 0; }
+        .ls-note code {
+            background: var(--black);
+            color: var(--vibrant-green);
+            padding: 1px 5px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+        }
+
         .cookie-textarea {
             width: 100%;
             min-height: 90px;
@@ -632,6 +653,16 @@
                             <label>SESSION COOKIES (JSON)</label>
                             <textarea id="cookies" class="cookie-textarea" placeholder='Tempel hasil Export JSON dari Cookie-Editor di sini...'></textarea>
                         </div>
+
+                        <div class="ls-note">
+                            <i class="ri-shopping-cart-2-fill"></i>
+                            <span>Mau screenshot <b>isi keranjang / data lokal</b>? Keranjang disimpan di <b>localStorage</b>, bukan cookie. Buka DevTools (F12) → Application → Local Storage → salin sebagai JSON <code>{"key":"value"}</code> dan tempel di bawah (opsional).</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label>LOCAL STORAGE (JSON, OPSIONAL)</label>
+                            <textarea id="localstorage" class="cookie-textarea" placeholder='{"cart":"[{...}]","theme":"dark"}'></textarea>
+                        </div>
                     </div>
                 </div>
 
@@ -783,13 +814,33 @@
                 }
             }
 
+            // Parse localStorage (opsional, untuk keranjang/data lokal)
+            let localStorageData = null;
+            const lsRaw = document.getElementById('localstorage').value.trim();
+            if (lsRaw) {
+                try {
+                    localStorageData = JSON.parse(lsRaw);
+                    if (typeof localStorageData !== 'object' || Array.isArray(localStorageData)) {
+                        throw new Error('harus object');
+                    }
+                } catch {
+                    alert('Format Local Storage tidak valid. Harus berupa JSON object {"key":"value"}.');
+                    submitBtn.disabled = false;
+                    btnText.textContent = 'AMBIL SCREENSHOT';
+                    btnIcon.style.display = 'block';
+                    loader.style.display = 'none';
+                    return;
+                }
+            }
+
             const payload = {
                 url: document.getElementById('url').value,
                 width: parseInt(wInput.value) || 1280,
                 height: parseInt(hInput.value) || 720,
                 device_scale: parseInt(document.getElementById('scale').value) || 1,
                 full_page: document.getElementById('fullpage').checked,
-                cookies: cookies
+                cookies: cookies,
+                local_storage: localStorageData
             };
 
             try {
