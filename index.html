@@ -1,0 +1,594 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Screenshot Web | R_hmt ofc</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;800&family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ================= TEMA NEO BRUTALISM (SUPER VIBRANT - NO PINK) ================= */
+        :root {
+            /* Background netral biar warna-warninya makin nonjol */
+            --bg-main: #f4f5f1; 
+            --black: #09090b;
+            --white: #ffffff;
+            
+            /* Warna-warna berani (TANPA PINK) */
+            --vibrant-orange: #ff6b00; /* Pengganti utama yang ngejreng */
+            --vibrant-violet: #8a2be2; /* Ungu elektrik */
+            --vibrant-cyan: #00e5ff;   /* Biru neon */
+            --vibrant-yellow: #ffeb3b; /* Kuning terang */
+            --vibrant-green: #00e676;  /* Hijau stabilo */
+            
+            --border: 3px solid var(--black);
+            --shadow: 6px 6px 0px var(--black);
+            --shadow-hover: 2px 2px 0px var(--black);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            background-image: radial-gradient(#ccc 2px, transparent 2px);
+            background-size: 20px 20px;
+            color: var(--black);
+            overflow-x: hidden;
+        }
+
+        /* Marquee Teks Berjalan */
+        .marquee-container {
+            width: 100%;
+            background: var(--vibrant-yellow);
+            color: var(--black);
+            padding: 10px 0;
+            border-bottom: var(--border);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            font-weight: 800;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        .marquee-content {
+            display: inline-block;
+            animation: marquee 15s linear infinite;
+        }
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* Navbar */
+        .navbar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background: var(--vibrant-violet); /* Navbar Ungu */
+            border-bottom: var(--border);
+            color: var(--white);
+        }
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        .logo-box {
+            background: var(--vibrant-orange); /* Logo Orange */
+            color: var(--white);
+            border: var(--border);
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 26px;
+            box-shadow: 3px 3px 0px var(--black);
+            border-radius: 0; 
+            transform: rotate(-5deg); 
+        }
+        .nav-brand h1 { font-size: 26px; font-weight: 800; text-transform: uppercase; margin: 0; }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        /* Neo Card */
+        .neo-card {
+            background: var(--white);
+            border: var(--border);
+            box-shadow: var(--shadow);
+            padding: 30px;
+            border-radius: 0;
+            margin-bottom: 30px;
+        }
+
+        .card-top {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 4px dotted var(--black);
+        }
+        .badge {
+            background: var(--vibrant-orange);
+            color: var(--white);
+            padding: 5px 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 800;
+            font-size: 12px;
+            box-shadow: 2px 2px 0px var(--black);
+        }
+
+        /* Form Elements */
+        .form-group { margin-bottom: 20px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;}
+
+        label {
+            display: block;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .input-box {
+            display: flex;
+            align-items: center;
+            border: var(--border);
+            background: var(--bg-main);
+            height: 50px;
+            transition: 0.2s;
+            overflow: hidden;
+            box-shadow: 2px 2px 0px var(--black);
+        }
+        .input-box:focus-within {
+            background: var(--white);
+            box-shadow: 4px 4px 0px var(--vibrant-cyan);
+            transform: translate(-2px, -2px);
+            border-color: var(--vibrant-cyan);
+        }
+        .input-box i { padding: 0 15px; font-size: 18px; border-right: var(--border); background: var(--white); }
+        
+        input[type="url"], input[type="number"], select {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: transparent;
+            padding: 0 15px;
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            outline: none;
+            color: var(--black);
+        }
+
+        .unit {
+            padding: 0 15px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 800;
+            border-left: var(--border);
+            background: var(--vibrant-cyan); /* Aksen Biru Muda */
+        }
+
+        /* Custom Select */
+        .select-box {
+            position: relative;
+            border: var(--border);
+            background: var(--white);
+            height: 50px;
+            display: flex;
+            align-items: center;
+            box-shadow: 2px 2px 0px var(--black);
+        }
+        .select-box select { appearance: none; cursor: pointer; }
+        .select-box i {
+            position: absolute;
+            right: 15px;
+            pointer-events: none;
+            font-size: 20px;
+            background: var(--vibrant-green); /* Aksen Hijau */
+            padding: 0 5px;
+            border: 2px solid var(--black);
+        }
+
+        /* Toggle Switch Full Page */
+        .fullpage-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--vibrant-yellow); /* Background Kuning */
+            border: var(--border);
+            height: 50px;
+            padding: 0 15px;
+            box-shadow: 2px 2px 0px var(--black);
+        }
+        .neo-switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+        .neo-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--white); border: 2px solid var(--black); transition: .2s; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: var(--black); transition: .2s; }
+        input:checked + .slider { background-color: var(--vibrant-violet); }
+        input:checked + .slider:before { transform: translateX(20px); background-color: var(--white); }
+
+        /* Buttons */
+        .btn-neo {
+            width: 100%;
+            height: 60px;
+            border: var(--border);
+            background: var(--vibrant-orange); /* Tombol Utama Orange */
+            color: var(--white);
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            box-shadow: var(--shadow);
+            transition: all 0.2s;
+            margin-top: 10px;
+            text-transform: uppercase;
+        }
+        .btn-neo:hover {
+            transform: translate(3px, 3px);
+            box-shadow: var(--shadow-hover);
+            background: #ff5500;
+        }
+        .btn-neo:disabled { background: #ccc; box-shadow: none; transform: none; cursor: not-allowed; color: #666; }
+
+        .download-btn {
+            background: var(--vibrant-green); /* Tombol Download Hijau */
+            color: var(--black);
+            margin-top: 20px;
+        }
+        .download-btn:hover { background: #00c263; }
+
+        .loader {
+            width: 20px; height: 20px;
+            border: 4px solid var(--white); border-top-color: transparent;
+            border-radius: 50%; animation: spin 1s linear infinite; display: none;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Preview Result */
+        #result-area { display: none; margin-top: 30px; }
+        .divider {
+            text-align: center; margin-bottom: 20px; font-weight: 800; position: relative;
+        }
+        .divider::before {
+            content: ""; position: absolute; top: 50%; left: 0; right: 0; border-top: 4px dashed var(--black); z-index: 1;
+        }
+        .divider span {
+            background: var(--vibrant-violet); color: var(--white); padding: 5px 15px; position: relative; z-index: 2; border: var(--border); font-size: 14px;
+        }
+
+        .preview-window { border: var(--border); background: var(--white); overflow: hidden; box-shadow: var(--shadow); }
+        .window-bar { background: var(--black); padding: 10px 15px; display: flex; align-items: center; gap: 10px; }
+        .circles { display: flex; gap: 6px; }
+        .c { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--white); }
+        .c.red { background: #ff5f56; } .c.yellow { background: #ffbd2e; } .c.green { background: #27c93f; }
+        .address-bar { flex: 1; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--black); background: var(--white); padding: 4px 10px; border-radius: 2px; text-align: center; font-weight: 800; }
+        
+        .img-container { padding: 15px; background: #e0e0e0; text-align: center; }
+        .img-container img { max-width: 100%; border: var(--border); }
+
+        /* Footer */
+        .main-footer { text-align: center; margin-top: 50px; padding-bottom: 40px; }
+        .powered-by { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; margin-bottom: 15px; }
+        
+        .join-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--vibrant-cyan); color: var(--black);
+            padding: 12px 25px; border: var(--border); border-radius: 0;
+            font-weight: 800; text-decoration: none; box-shadow: var(--shadow);
+            transition: 0.2s; margin-bottom: 25px; text-transform: uppercase;
+        }
+        .join-btn:hover { transform: translate(2px, 2px); box-shadow: var(--shadow-hover); }
+
+        .social-icons { display: flex; justify-content: center; gap: 20px; font-size: 32px; }
+        .social-icons a { color: var(--black); text-decoration: none; transition: 0.2s; }
+        .social-icons a:hover { color: var(--vibrant-orange); transform: translateY(-3px) rotate(5deg); }
+
+        /* Credit By Krisna */
+        .credit-by {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 30px;
+            background: var(--black);
+            color: var(--white);
+            padding: 8px 18px;
+            border: var(--border);
+            box-shadow: 4px 4px 0px var(--vibrant-violet);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .credit-by span { color: var(--vibrant-cyan); }
+        .credit-by i { color: var(--vibrant-green); font-size: 16px; }
+
+        @media (max-width: 600px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            .container { padding: 0 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="marquee-container">
+        <div class="marquee-content">
+            <i class="ri-flashlight-fill"></i> HIGH DEFINITION WEB CAPTURE &nbsp;&nbsp;&bull;&nbsp;&nbsp; 
+            <i class="ri-rocket-2-fill"></i> FAST RENDERING ENGINE &nbsp;&nbsp;&bull;&nbsp;&nbsp; 
+            <i class="ri-code-box-fill"></i> DEVELOPED BY KRISNA &nbsp;&nbsp;&bull;&nbsp;&nbsp;
+            <i class="ri-flashlight-fill"></i> HIGH DEFINITION WEB CAPTURE &nbsp;&nbsp;&bull;&nbsp;&nbsp; 
+            <i class="ri-rocket-2-fill"></i> FAST RENDERING ENGINE &nbsp;&nbsp;&bull;&nbsp;&nbsp; 
+            <i class="ri-code-box-fill"></i> DEVELOPED BY KRISNA
+        </div>
+    </div>
+
+    <!-- LOGO GESER KE SAMPING -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <div class="logo-box">
+                <i class="ri-camera-lens-line"></i>
+            </div>
+            <h1>SCREENSHOT WEB</h1>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section id="generator" class="neo-card">
+            <div class="card-top">
+                <span class="badge">REC</span>
+                <span style="font-weight: 800; font-size: 14px;">LIVE CAPTURE SYSTEM</span>
+            </div>
+            
+            <form id="ss-form">
+                <div class="form-group">
+                    <label>TARGET URL</label>
+                    <div class="input-box">
+                        <i class="ri-links-line"></i>
+                        <input type="url" id="url" placeholder="https://domain-target.com" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>PILIH RESOLUSI</label>
+                    <div class="select-box">
+                        <select id="device-preset" style="padding-left: 15px;">
+                            <option value="phone">Mobile (375 x 812)</option>
+                            <option value="tablet">Tablet (768 x 1024)</option>
+                            <option value="laptop">Laptop (1366 x 768)</option>
+                            <option value="pcfhd" selected>PC FHD (1920 x 1080)</option>
+                            <option value="pc4k">PC 4K (3840 x 2160)</option>
+                            <option value="custom">Custom (Atur Manual)</option>
+                        </select>
+                        <i class="ri-arrow-down-s-fill"></i>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>VIEWPORT WIDTH</label>
+                        <div class="input-box">
+                            <input type="number" id="width" value="1920">
+                            <span class="unit">PX</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>VIEWPORT HEIGHT</label>
+                        <div class="input-box">
+                            <input type="number" id="height" value="1080">
+                            <span class="unit">PX</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grid Rapi: Render Scale disebelah Full Page Mode -->
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>RENDER SCALE</label>
+                        <div class="select-box">
+                            <select id="scale" style="padding-left: 15px;">
+                                <option value="1">1x (Standard)</option>
+                                <option value="2">2x (Retina HD)</option>
+                                <option value="3">3x (Ultra 4K)</option>
+                            </select>
+                            <i class="ri-arrow-down-s-fill"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>FULL PAGE MODE</label>
+                        <div class="fullpage-box">
+                            <span style="font-size: 13px; font-weight: 800; color: var(--black);">AKTIFKAN</span>
+                            <label class="neo-switch">
+                                <input type="checkbox" id="fullpage">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" id="submit-btn" class="btn-neo">
+                    <span id="btn-text">AMBIL SCREENSHOT</span>
+                    <i class="ri-flashlight-fill" id="btn-icon"></i>
+                    <div class="loader" id="loader"></div>
+                </button>
+            </form>
+
+            <div id="result-area">
+                <div class="divider"><span>HASIL CAPTURE</span></div>
+                
+                <div class="preview-window">
+                    <div class="window-bar">
+                        <div class="circles">
+                            <span class="c red"></span>
+                            <span class="c yellow"></span>
+                            <span class="c green"></span>
+                        </div>
+                        <div class="address-bar">capture_result.png</div>
+                    </div>
+                    <div class="img-container">
+                        <img id="result-img" src="" alt="Result">
+                    </div>
+                </div>
+
+                <button id="download-btn" class="btn-neo download-btn">
+                    <i class="ri-download-cloud-2-fill"></i> SIMPAN GAMBAR
+                </button>
+            </div>
+        </section>
+
+        <footer class="main-footer">
+            <div class="social-icons">
+                <a href="https://www.instagram.com/krisnatfk_" target="_blank"><i class="ri-instagram-line"></i></a>
+                <a href="https://www.tiktok.com/@krisnatfk__" target="_blank"><i class="ri-tiktok-fill"></i></a>
+                <a href="https://www.linkedin.com/in/krisna-taufik" target="_blank"><i class="ri-linkedin-box-fill"></i></a>
+            </div>
+
+            <div class="credit-by">
+                <i class="ri-code-s-slash-line"></i> WEBSITE BY <span>KRISNA</span>
+            </div>
+        </footer>
+    </main>
+
+    <script>
+        // ================= JAVASCRIPT SECTION =================
+
+        // --- Proteksi Source Code (deterrent untuk orang awam) ---
+        (function () {
+            // Matikan klik kanan / context menu
+            document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+            // Blokir shortcut keyboard inspeksi
+            document.addEventListener('keydown', (e) => {
+                const key = e.key.toLowerCase();
+                if (
+                    e.key === 'F12' ||                                   // DevTools
+                    (e.ctrlKey && e.shiftKey && ['i', 'j', 'c'].includes(key)) || // Inspect/Console
+                    (e.ctrlKey && key === 'u') ||                        // View Source
+                    (e.ctrlKey && key === 's')                           // Save Page
+                ) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+            // Cegah drag gambar hasil (biar ga gampang di-save lewat drag)
+            document.addEventListener('dragstart', (e) => {
+                if (e.target.tagName === 'IMG') e.preventDefault();
+            });
+        })();
+
+        const API_URL = '/api/screenshot';
+
+        // --- Logika Dropdown Resolusi ---
+        const presetSelect = document.getElementById('device-preset');
+        const wInput = document.getElementById('width');
+        const hInput = document.getElementById('height');
+
+        const deviceSizes = {
+            phone: { w: 375, h: 812 },
+            tablet: { w: 768, h: 1024 },
+            laptop: { w: 1366, h: 768 },
+            pcfhd: { w: 1920, h: 1080 },
+            pc4k: { w: 3840, h: 2160 }
+        };
+
+        presetSelect.addEventListener('change', (e) => {
+            const val = e.target.value;
+            if (val !== 'custom' && deviceSizes[val]) {
+                wInput.value = deviceSizes[val].w;
+                hInput.value = deviceSizes[val].h;
+            }
+        });
+
+        const setCustom = () => presetSelect.value = 'custom';
+        wInput.addEventListener('input', setCustom);
+        hInput.addEventListener('input', setCustom);
+
+        // --- Logika Core Capture ---
+        const form = document.getElementById('ss-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const btnText = document.getElementById('btn-text');
+        const btnIcon = document.getElementById('btn-icon');
+        const loader = document.getElementById('loader');
+        const resultArea = document.getElementById('result-area');
+        const resultImg = document.getElementById('result-img');
+        const downloadBtn = document.getElementById('download-btn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            submitBtn.disabled = true;
+            btnText.textContent = 'MEMPROSES...';
+            btnIcon.style.display = 'none';
+            loader.style.display = 'block';
+            resultArea.style.display = 'none';
+
+            // Parameter delay dihapus total (menggunakan kecepatan asli provider)
+            const payload = {
+                url: document.getElementById('url').value,
+                width: parseInt(wInput.value) || 1280,
+                height: parseInt(hInput.value) || 720,
+                device_scale: parseInt(document.getElementById('scale').value) || 1,
+                full_page: document.getElementById('fullpage').checked
+            };
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    resultImg.src = data.image_url;
+                    resultArea.style.display = 'block';
+                    resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else {
+                    alert('Gagal mengambil screenshot. Cek URL lagi bro.');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan koneksi ke server.');
+            } finally {
+                submitBtn.disabled = false;
+                btnText.textContent = 'AMBIL SCREENSHOT';
+                btnIcon.style.display = 'block';
+                loader.style.display = 'none';
+            }
+        });
+
+        // --- LOGIKA DOWNLOAD (SOLUSI FINAL TEMBUS CORS & AMAN) ---
+        // PASTIKAN LU UDAH BIKIN FILE api/download.js
+        downloadBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            const imageUrl = resultImg.src;
+            if(!imageUrl) return;
+
+            // Memaksa browser mengunduh melalui backend api/download.js
+            window.location.href = `/api/download?url=${encodeURIComponent(imageUrl)}`;
+        });
+    </script>
+</body>
+</html> 
