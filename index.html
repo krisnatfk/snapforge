@@ -274,19 +274,83 @@
         .advanced-body { display: none; padding: 15px; }
         .advanced-section.open .advanced-body { display: block; }
 
-        .advanced-note {
+        /* Tutorial Box */
+        .tutorial-box {
+            background: var(--bg-main);
+            border: 2px solid var(--black);
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .tutorial-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 13px;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tutorial-title i { color: var(--vibrant-violet); font-size: 18px; }
+
+        .tutorial-step {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            align-items: flex-start;
+        }
+        .step-num {
+            flex-shrink: 0;
+            width: 26px;
+            height: 26px;
+            background: var(--vibrant-orange);
+            color: var(--white);
+            border: 2px solid var(--black);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 800;
+            font-size: 13px;
+            box-shadow: 2px 2px 0px var(--black);
+        }
+        .step-text {
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            line-height: 1.5;
+            padding-top: 2px;
+        }
+        .step-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--vibrant-cyan);
+            color: var(--black);
+            border: 2px solid var(--black);
+            padding: 2px 8px;
+            margin: 4px 6px 0 0;
+            font-size: 11px;
+            font-weight: 800;
+            text-decoration: none;
+            text-transform: uppercase;
+        }
+        .step-link:hover { background: var(--vibrant-green); }
+        .step-link i { font-size: 12px; }
+
+        .tutorial-warn {
             display: flex;
             gap: 10px;
             background: var(--vibrant-yellow);
             border: 2px solid var(--black);
             padding: 10px 12px;
+            margin-top: 14px;
             font-family: 'Inter', sans-serif;
             font-size: 12px;
             font-weight: 600;
             line-height: 1.5;
-            margin-bottom: 15px;
         }
-        .advanced-note i { font-size: 18px; flex-shrink: 0; }
+        .tutorial-warn i { font-size: 18px; flex-shrink: 0; }
 
         .cookie-textarea {
             width: 100%;
@@ -513,14 +577,42 @@
                     </button>
 
                     <div class="advanced-body" id="advanced-body">
-                        <div class="advanced-note">
-                            <i class="ri-information-fill"></i>
-                            <span>Untuk screenshot halaman yang butuh login, tempel <b>cookie sesi</b> akunmu sendiri. Ambil pakai ekstensi browser <b>Cookie-Editor</b> (export format JSON), lalu paste di bawah. <b>Jangan pernah</b> pakai cookie akun orang lain.</span>
+                        <div class="tutorial-box">
+                            <div class="tutorial-title"><i class="ri-guide-fill"></i> CARA PAKAI (IKUTI URUTAN)</div>
+
+                            <div class="tutorial-step">
+                                <span class="step-num">1</span>
+                                <div class="step-text">
+                                    Install ekstensi <b>Cookie-Editor</b> di browsermu.
+                                    <a href="https://chromewebstore.google.com/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm" target="_blank" class="step-link">Chrome / Edge <i class="ri-external-link-line"></i></a>
+                                    <a href="https://addons.mozilla.org/firefox/addon/cookie-editor/" target="_blank" class="step-link">Firefox <i class="ri-external-link-line"></i></a>
+                                </div>
+                            </div>
+
+                            <div class="tutorial-step">
+                                <span class="step-num">2</span>
+                                <div class="step-text">Buka website target di tab baru, lalu <b>login</b> sampai masuk ke halaman yang mau di-screenshot.</div>
+                            </div>
+
+                            <div class="tutorial-step">
+                                <span class="step-num">3</span>
+                                <div class="step-text">Klik ikon <b>Cookie-Editor</b> di toolbar → klik tombol <b>Export</b> (ikon panah) → pilih <b>JSON</b>. Cookie otomatis ter-copy.</div>
+                            </div>
+
+                            <div class="tutorial-step">
+                                <span class="step-num">4</span>
+                                <div class="step-text">Balik ke sini, <b>paste</b> (Ctrl+V) di kotak bawah. Isi URL halaman target di atas, lalu klik <b>AMBIL SCREENSHOT</b>.</div>
+                            </div>
+
+                            <div class="tutorial-warn">
+                                <i class="ri-shield-keyhole-fill"></i>
+                                <span>Cookie = kunci akunmu. Cuma pakai <b>akun sendiri</b>, jangan akun orang lain. Cookie tidak disimpan server, dipakai sekali lalu hilang.</span>
+                            </div>
                         </div>
 
                         <div class="form-group">
                             <label>SESSION COOKIES (JSON)</label>
-                            <textarea id="cookies" class="cookie-textarea" placeholder='[{"name":"session","value":"abc123","domain":".target.com"}]'></textarea>
+                            <textarea id="cookies" class="cookie-textarea" placeholder='Tempel hasil Export JSON dari Cookie-Editor di sini...'></textarea>
                         </div>
                     </div>
                 </div>
