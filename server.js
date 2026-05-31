@@ -169,7 +169,16 @@ app.post('/api/screenshot', async (req, res) => {
         await page.evaluate((data) => {
           for (const key in data) {
             if (Object.prototype.hasOwnProperty.call(data, key)) {
-              try { window.localStorage.setItem(key, String(data[key])); } catch {}
+              try {
+                let val = data[key];
+                // Kalau value berupa object/array → ubah jadi JSON string dulu.
+                // Ini memudahkan user: bisa paste array/object langsung tanpa
+                // perlu escape tanda kutip (\") secara manual.
+                if (typeof val !== 'string') {
+                  val = JSON.stringify(val);
+                }
+                window.localStorage.setItem(key, val);
+              } catch {}
             }
           }
         }, local_storage);
