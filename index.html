@@ -245,6 +245,64 @@
         input:checked + .slider { background-color: var(--vibrant-violet); }
         input:checked + .slider:before { transform: translateX(20px); background-color: var(--white); }
 
+        /* Advanced Section (Login/Cookie) */
+        .advanced-section {
+            border: var(--border);
+            box-shadow: 2px 2px 0px var(--black);
+            margin-bottom: 20px;
+            background: var(--white);
+        }
+        .advanced-toggle {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--black);
+            color: var(--white);
+            border: none;
+            padding: 14px 15px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 13px;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+        .advanced-toggle i:first-child { color: var(--vibrant-yellow); }
+        .advanced-toggle #advanced-chevron { transition: transform 0.2s; font-size: 20px; }
+        .advanced-section.open #advanced-chevron { transform: rotate(180deg); }
+
+        .advanced-body { display: none; padding: 15px; }
+        .advanced-section.open .advanced-body { display: block; }
+
+        .advanced-note {
+            display: flex;
+            gap: 10px;
+            background: var(--vibrant-yellow);
+            border: 2px solid var(--black);
+            padding: 10px 12px;
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+        .advanced-note i { font-size: 18px; flex-shrink: 0; }
+
+        .cookie-textarea {
+            width: 100%;
+            min-height: 90px;
+            border: var(--border);
+            background: var(--bg-main);
+            padding: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 500;
+            resize: vertical;
+            outline: none;
+            box-shadow: 2px 2px 0px var(--black);
+        }
+        .cookie-textarea:focus { background: var(--white); border-color: var(--vibrant-cyan); }
+
         /* Buttons */
         .btn-neo {
             width: 100%;
@@ -447,6 +505,26 @@
                     </div>
                 </div>
 
+                <!-- ADVANCED: Screenshot halaman setelah login (cookie injection) -->
+                <div class="advanced-section">
+                    <button type="button" id="advanced-toggle" class="advanced-toggle">
+                        <span><i class="ri-lock-2-fill"></i> MODE LOGIN (ADVANCED)</span>
+                        <i class="ri-arrow-down-s-fill" id="advanced-chevron"></i>
+                    </button>
+
+                    <div class="advanced-body" id="advanced-body">
+                        <div class="advanced-note">
+                            <i class="ri-information-fill"></i>
+                            <span>Untuk screenshot halaman yang butuh login, tempel <b>cookie sesi</b> akunmu sendiri. Ambil pakai ekstensi browser <b>Cookie-Editor</b> (export format JSON), lalu paste di bawah. <b>Jangan pernah</b> pakai cookie akun orang lain.</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label>SESSION COOKIES (JSON)</label>
+                            <textarea id="cookies" class="cookie-textarea" placeholder='[{"name":"session","value":"abc123","domain":".target.com"}]'></textarea>
+                        </div>
+                    </div>
+                </div>
+
                 <button type="submit" id="submit-btn" class="btn-neo">
                     <span id="btn-text">AMBIL SCREENSHOT</span>
                     <i class="ri-flashlight-fill" id="btn-icon"></i>
@@ -545,6 +623,12 @@
         wInput.addEventListener('input', setCustom);
         hInput.addEventListener('input', setCustom);
 
+        // --- Toggle Advanced (Login/Cookie) ---
+        const advSection = document.querySelector('.advanced-section');
+        document.getElementById('advanced-toggle').addEventListener('click', () => {
+            advSection.classList.toggle('open');
+        });
+
         // --- Logika Core Capture ---
         const form = document.getElementById('ss-form');
         const submitBtn = document.getElementById('submit-btn');
@@ -564,13 +648,30 @@
             loader.style.display = 'block';
             resultArea.style.display = 'none';
 
-            // Parameter delay dihapus total (menggunakan kecepatan asli provider)
+            // Parse cookies (opsional, untuk halaman login)
+            let cookies = [];
+            const cookieRaw = document.getElementById('cookies').value.trim();
+            if (cookieRaw) {
+                try {
+                    cookies = JSON.parse(cookieRaw);
+                    if (!Array.isArray(cookies)) throw new Error('bukan array');
+                } catch {
+                    alert('Format cookie tidak valid. Harus berupa JSON array dari Cookie-Editor.');
+                    submitBtn.disabled = false;
+                    btnText.textContent = 'AMBIL SCREENSHOT';
+                    btnIcon.style.display = 'block';
+                    loader.style.display = 'none';
+                    return;
+                }
+            }
+
             const payload = {
                 url: document.getElementById('url').value,
                 width: parseInt(wInput.value) || 1280,
                 height: parseInt(hInput.value) || 720,
                 device_scale: parseInt(document.getElementById('scale').value) || 1,
-                full_page: document.getElementById('fullpage').checked
+                full_page: document.getElementById('fullpage').checked,
+                cookies: cookies
             };
 
             try {
@@ -587,7 +688,7 @@
                     resultArea.style.display = 'block';
                     resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 } else {
-                    alert('Gagal mengambil screenshot. Cek URL lagi bro.');
+                    alert(data.message || 'Gagal mengambil screenshot. Cek URL lagi bro.');
                 }
 
             } catch (error) {

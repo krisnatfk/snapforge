@@ -74,6 +74,7 @@ app.post('/api/screenshot', async (req, res) => {
     height = 720,
     device_scale = 1,
     full_page = false,
+    cookies = [],
   } = req.body;
 
   // Validasi URL
@@ -114,6 +115,37 @@ app.post('/api/screenshot', async (req, res) => {
     await page.setUserAgent(
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
     );
+
+    // ── Injeksi cookie sesi (untuk screenshot halaman setelah login) ──
+    // Cookie dipakai sekali untuk request ini lalu hilang saat browser ditutup.
+    // TIDAK disimpan & TIDAK di-log demi keamanan akun user.
+    if (Array.isArray(cookies) && cookies.length > 0) {
+      const targetHost = new URL(targetUrl).hostname;
+      const cleanCookies = cookies
+        .filter((c) => c && c.name && typeof c.value !== 'undefined')
+        .map((c) => {
+          const cookie = {
+            name: String(c.name),
+            value: String(c.value),
+            domain: c.domain ? String(c.domain) : targetHost,
+            path: c.path ? String(c.path) : '/',
+          };
+          // Field opsional kalau ada
+          if (typeof c.secure === 'boolean') cookie.secure = c.secure;
+          if (typeof c.httpOnly === 'boolean') cookie.httpOnly = c.httpOnly;
+          if (c.expires && Number(c.expires) > 0) cookie.expires = Number(c.expires);
+          return cookie;
+        });
+
+      if (cleanCookies.length > 0) {
+        try {
+          await page.setCookie(...cleanCookies);
+          console.log(`🔐 Cookie sesi di-inject (${cleanCookies.length} item)`);
+        } catch (cookieErr) {
+          console.error('Gagal set cookie:', cookieErr.message);
+        }
+      }
+    }
 
     // Tunggu hingga halaman + resource (termasuk font) selesai dimuat.
     // networkidle0 = tunggu sampai benar-benar tidak ada request aktif.
