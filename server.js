@@ -192,15 +192,55 @@ app.post('/api/screenshot', async (req, res) => {
     // Wajib untuk full_page; juga membantu viewport-mode kalau ada lazy image.
     await autoScroll(page);
 
-    // Beri waktu render final: font, animasi chart (canvas/requestAnimationFrame),
-    // dan elemen lain selesai. Pakai delay sederhana — andal & tidak menggantung.
-    // (page.evaluate untuk fonts.ready / rAF terbukti bisa hang di SPA berat,
-    //  jadi sengaja dihindari.)
-    await new Promise((r) => setTimeout(r, 2500));
+    // ── Khusus FULL PAGE: set viewport ke tinggi penuh halaman, lalu jepret
+    //    pakai screenshot VIEWPORT BIASA (bukan fullPage:true) ──
+    // Kenapa: page.screenshot({fullPage:true}) melakukan resize internal LAGI
+    // saat menjepret, yang memicu chart responsive (ResizeObserver) menggambar
+    // ulang dari nol dan langsung ketangkap setengah jadi. Dengan men-set
+    // viewport setinggi halaman lalu jepret viewport biasa, tidak ada resize
+    // kedua → chart sudah selesai menggambar saat dijepret.
+    let useFullPageFlag = Boolean(full_page);
+
+    if (full_page) {
+      try {
+        const fullHeight = await page.evaluate(() => {
+          return Math.max(
+            document.body.scrollHeight,
+            document.documentElement.scrollHeight,
+            document.body.offsetHeight,
+            document.documentElement.offsetHeight
+          );
+        });
+
+        // Set viewport tinggi = tinggi penuh halaman (cap 20000px biar aman)
+        await page.setViewport({
+          width: parseInt(width),
+          height: Math.min(fullHeight, 20000),
+          deviceScaleFactor: parseInt(device_scale),
+        });
+
+        // Pastikan di posisi paling atas
+        await page.evaluate(() => window.scrollTo(0, 0));
+
+        // Beri waktu chart & elemen responsive selesai menggambar ulang
+        // setelah perubahan ukuran viewport.
+        await new Promise((r) => setTimeout(r, 2500));
+
+        // Karena viewport sudah setinggi halaman, jepret viewport biasa.
+        // Ini menghindari resize internal kedua dari fullPage:true.
+        useFullPageFlag = false;
+      } catch {
+        // kalau gagal, balik ke fullPage bawaan Puppeteer
+        useFullPageFlag = true;
+      }
+    }
+
+    // Beri waktu render final (font, animasi chart). Delay sederhana — andal.
+    await new Promise((r) => setTimeout(r, 1500));
 
     // Ambil screenshot
     const screenshotBuffer = await page.screenshot({
-      fullPage: Boolean(full_page),
+      fullPage: useFullPageFlag,
       type: 'png',
     });
 
